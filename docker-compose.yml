@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpadmin_container
+    environment:
+      PMA_HOST: host.docker.internal  
+    ports:
+      - 8000:80
+    restart: always
+
+  server:
+    build: ./labsServer
+    container_name: server_container
+    environment:
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ''
+      MYSQL_DATABASE: users_api_db  
+      MYSQL_HOST: host.docker.internal  
+    ports:
+      - 8080:8080
+    volumes:
+      - ./labs1Server:/server.js
+    command: node server.js
+    depends_on:
+      - phpmyadmin
+
+  client:
+    build: ./lab1
+    container_name: client_container
+    environment:
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ''
+      MYSQL_DATABASE: users_api_db 
+      NODE_PATH: src
+    ports:
+      - 5173:5173
+    volumes:
+      - ./lab1:/src
+    command: npm run dev -- --host
